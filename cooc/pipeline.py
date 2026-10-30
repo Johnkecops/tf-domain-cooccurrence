@@ -22,8 +22,10 @@ import threading
 import pandas as pd
 
 SPECIES_RE = re.compile(r"[A-Za-z0-9_]{1,64}")
-# Binary comes from the environment only, never from the web UI.
-AUGUSTUS_BIN = os.environ.get("AUGUSTUS_BIN", "augustus")
+# Binary comes from the environment or PATH, never from the web UI. Fallback: Homebrew wrapper,
+# which also sets AUGUSTUS_CONFIG_PATH.
+AUGUSTUS_BIN = (os.environ.get("AUGUSTUS_BIN") or shutil.which("augustus")
+                or "/opt/homebrew/opt/augustus/bin/augustus")
 # ponytail: one pipeline run per server process; use a job queue if several users need parallel runs.
 GP_LOCK = threading.Lock()
 

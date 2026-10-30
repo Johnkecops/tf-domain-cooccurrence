@@ -18,6 +18,9 @@ import streamlit as st
 
 from cooc.core import DEFAULT_CLASSES, analyze, count_fasta, demo_datasets, read_annotation
 from cooc.pipeline import GP_LOCK, augustus_path, augustus_proteins, hmm_annotate, run_augustus
+from cooc.uniprot import fetch_reference_proteome
+
+fetch_proteome = st.cache_data(show_spinner=False, max_entries=20)(fetch_reference_proteome)
 
 st.set_page_config(page_title="TF Domain Co-occurrence", layout="wide")
 st.title("Genome-wide protein domain co-occurrence of transcription factors")
@@ -62,6 +65,18 @@ with tab_data:
                 ss.datasets.append(dict(species=species, source=source, n=n, annot=annot))
             except Exception as e:
                 st.error(f"Could not add dataset: {e}")
+    st.markdown("**Or fetch real data:** a UniProt reference proteome (one canonical protein per gene, "
+                "n = genes in its gene2acc file) with its UniProtKB Pfam domains. Find IDs at "
+                "[uniprot.org/proteomes](https://www.uniprot.org/proteomes); e.g. UP000005640 human, "
+                "UP000000589 mouse, UP000002311 yeast. Large proteomes take a few minutes.")
+    with st.form("uniprot"):
+        upid = st.text_input("Reference proteome ID", "UP000005640", max_chars=11)
+        if st.form_submit_button("Fetch from UniProt"):
+            try:
+                with st.spinner(f"Downloading {upid} from UniProt and Pfam..."):
+                    ss.datasets.append(fetch_proteome(upid))
+            except Exception as e:
+                st.error(f"Could not fetch {upid}: {e}")
     if ss.datasets:
         st.dataframe(pd.DataFrame([dict(species=d["species"], source=d["source"], n=d["n"],
                                         hits=len(d["annot"]), genes=d["annot"]["gene_id"].nunique())
