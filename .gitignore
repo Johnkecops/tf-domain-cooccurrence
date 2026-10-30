@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+MEMORY.md
+ERRORS.md
+.pytest_cache/
+.claude/
+*.pdf
+.streamlit/secrets.toml

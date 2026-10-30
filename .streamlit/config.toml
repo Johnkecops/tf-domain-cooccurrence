@@ -1,0 +1,8 @@
+[server]
+# Local use only. For a shared deployment put an authenticating reverse proxy in front.
+address = "localhost"
+maxUploadSize = 100
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false
